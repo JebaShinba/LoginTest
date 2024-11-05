@@ -39,4 +39,4 @@ jobs:
 
     - name: Run Selenium Tests
       run: |
-        python valid.py
+        python -m login_testcases.valid
