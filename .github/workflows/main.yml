@@ -34,6 +34,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y google-chrome-stable
+    - name: List files for debugging
+      run: ls -R  # Check that valid.py or your test script is present
 
     - name: Run Selenium Tests
       run: |
