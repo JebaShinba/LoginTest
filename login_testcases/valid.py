@@ -19,7 +19,15 @@ class ValidLoginTest(unittest.TestCase):
             # Retrieve valid users
             cls.valid_users = list(cls.users_collection.find({"is_valid": True}))
             if not cls.valid_users:
-                raise Exception("No valid users found in the database!")
+                # Insert a test user if none exist
+                print("No valid users found. Inserting a test user...")
+                cls.users_collection.insert_one({
+                    "username": "testuser",
+                    "password": "testpass",
+                    "baseurl": "http://example.com",
+                    "is_valid": True
+                })
+                cls.valid_users = list(cls.users_collection.find({"is_valid": True}))
 
             # Configure headless Chrome options
             chrome_options = Options()
@@ -35,7 +43,7 @@ class ValidLoginTest(unittest.TestCase):
 
         except Exception as e:
             print("Error connecting to MongoDB:", e)
-            cls.tearDownClass()  # Ensure cleanup in case of setup failure
+            cls.tearDownClass()
             raise
 
     def test_login_with_valid_users(self):
