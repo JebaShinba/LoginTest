@@ -30,10 +30,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    
-    - name: List files for debugging
-      run: ls -R  # Check that valid.py or your test script is present
+    - name: Seed MongoDB with test data
+      run: |
+        echo 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})' | mongosh "mongodb://127.0.0.1:27017/sampleupload"
+
+    - name: Set up ChromeDriver and Chrome
+      uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: 'latest'
 
     - name: Run Selenium Tests
+      env:
+        MONGO_URI: "mongodb://127.0.0.1:27017/"
       run: |
-        python -m login_testcases.valid
+        python -m unittest discover -s login_testcases -p "valid.py"
