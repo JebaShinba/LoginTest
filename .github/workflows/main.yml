@@ -30,10 +30,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Install mongosh
+    - name: Install MongoDB tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y mongodb-org-shell
+        sudo apt-get install -y mongodb-clients
 
     - name: Seed MongoDB with test data
       run: |
@@ -49,6 +49,3 @@ jobs:
         MONGO_URI: "mongodb://127.0.0.1:27017/sampleupload"
       run: |
         python -m unittest discover -s login_testcases -p "valid.py"
-
-     
-       
