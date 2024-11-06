@@ -15,11 +15,6 @@ jobs:
         image: mongo:4.4
         ports:
           - 27017:27017
-        options: >-
-          --health-cmd='mongo --eval "db.runCommand({ connectionStatus: 1 })"'
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     steps:
     - name: Checkout code
@@ -46,18 +41,10 @@ jobs:
         # Install mongo-tools via mongodb-org-tools
         sudo apt-get install -y mongodb-org-tools
 
-    - name: Wait for MongoDB to be ready
-      run: |
-        echo "Waiting for MongoDB to be ready..."
-        until docker exec mongodb mongo --eval "db.runCommand({ connectionStatus: 1 })" > /dev/null 2>&1; do
-          sleep 5
-        done
-        echo "MongoDB is ready."
 
     - name: Seed MongoDB with test data
       run: |
         docker exec mongodb mongo "mongodb://127.0.0.1:27017/sampleupload" --eval 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})'
-
     - name: Set up ChromeDriver and Chrome
       uses: browser-actions/setup-chrome@v1
       with:
@@ -68,3 +55,4 @@ jobs:
         MONGO_URI: "mongodb://127.0.0.1:27017/sampleupload"
       run: |
         python -m unittest discover -s login_testcases -p "valid.py"
+
