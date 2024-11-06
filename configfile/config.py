@@ -1,30 +1,36 @@
+import os
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
-MONGO_URI = "mongodb://127.0.0.1:27017/"
-DATABASE_NAME = "sampleupload"  # Use your actual database name
-USER_COLLECTION = "users"  # Corrected variable name
-FILES_COLLECTION = "deletefiles"
+MONGO_URI = "mongodb://127.0.0.1:27017/"  # MongoDB URI
+DATABASE_NAME = "sampleupload"  # Your database name
+USER_COLLECTION = "users"  # Your collection name
 
-def get_db():
-    """Connect to MongoDB and return the database instance."""
-    client = MongoClient(MONGO_URI)
-    db = client[DATABASE_NAME]
-    return db, client  # Return both the database and client for later closure
+def setup_mongodb():
+    # Retrieve MongoDB URI from environment variable if set
+    mongo_uri = os.getenv("MONGO_URI", MONGO_URI)
 
-def get_users_collection():
-    """Get the users collection from the database."""
-    db, client = get_db()  # Get both the database and client
     try:
-        user_collection = db[USER_COLLECTION]  # Use a single bracket
-        return user_collection  # Return the users collection
-    finally:
-        client.close()  # Ensure the client is closed after use
+        # Connect to MongoDB
+        client = MongoClient(mongo_uri, serverSelectionTimeoutMS=5000)
+        client.admin.command('ping')  # Ping to check connection
+        print("MongoDB connected successfully!")
+    except ConnectionFailure as e:
+        print(f"Failed to connect to MongoDB: {e}")
+        exit(1)
 
-def get_files_collection():
-    """Get the files collection from the database."""
-    db, client = get_db()  # Get both the database and client
-    try:
-        files_collection = db[FILES_COLLECTION]  # Use a single bracket
-        return files_collection  # Return the files collection
-    finally:
-        client.close()  # Ensure the client is closed after use
+    # Set up test data (example)
+    db = client.get_database(DATABASE_NAME)  # Use your actual database
+    collection = db.get_collection(USER_COLLECTION)  # Use your collection
+
+    # Example: Insert some test documents
+    sample_data = [
+        {"username": "testuser1", "password": "password123", "email": "user1@test.com"},
+        {"username": "testuser2", "password": "password456", "email": "user2@test.com"}
+    ]
+    
+    collection.insert_many(sample_data)
+    print(f"Test data inserted into {db.name}.{collection.name}")
+
+if __name__ == "__main__":
+    setup_mongodb()
