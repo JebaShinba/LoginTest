@@ -51,8 +51,7 @@ jobs:
           echo "::set-output name=container_id::$CONTAINER_ID"  # Deprecated, will use new method soon
     - name: List running containers
       run: docker ps
-    - name: View MongoDB logs
-      run: docker logs $CONTAINER_ID
+    
     
 
     - name: Seed MongoDB with test data
