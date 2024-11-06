@@ -31,7 +31,7 @@ jobs:
 
     - name: Configure MongoDB Test Data
       run: |
-        python  scripts\setup_mongodb.py # Run the setup script
+        python  scripts/setup_mongodb.py # Run the setup script
 
     - name: Run Selenium Tests
       env:
