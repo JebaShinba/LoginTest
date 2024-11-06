@@ -40,6 +40,26 @@ jobs:
         sudo apt-get update
         # Install mongo-tools via mongodb-org-tools
         sudo apt-get install -y mongodb-org-tools
+    - name: Wait for MongoDB to be ready
+      run: |
+        echo "Waiting for MongoDB to be ready..."
+        until docker ps --filter "name=mongodb" --filter "status=running" | grep mongodb; do
+          echo "MongoDB is not ready, waiting..."
+          sleep 5
+        done
+        echo "MongoDB is ready."
+
+    - name: Get MongoDB container ID
+      id: mongodb_id
+      run: |
+        CONTAINER_ID=$(docker ps -q --filter "name=mongodb")
+        echo "MongoDB container ID: $CONTAINER_ID"
+        echo "::set-output name=container_id::$CONTAINER_ID"
+
+    - name: Seed MongoDB with test data
+      run: |
+        # Use the container ID dynamically fetched above
+        docker exec ${{ steps.mongodb_id.outputs.container_id }} mongo "mongodb://127.0.0.1:27017/sampleupload" --eval 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})'
 
 
     - name: Seed MongoDB with test data
