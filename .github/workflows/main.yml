@@ -10,6 +10,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mongodb:
+        image: mongo:4.4
+        ports:
+          - 27017:27017
+        options: --health-cmd="mongo --eval 'db.runCommand({ ping: 1 })'" --health-interval=10s --health-timeout=5s --health-retries=5
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -24,16 +31,28 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Set Environment Variables
+      run: |
+        echo "PYTHONPATH=$PWD/login_test/homeobjects:$PWD/LoginTest/configfile/config.py" >> $GITHUB_ENV
+        echo "MONGO_URI=mongodb://127.0.0.1:27017/sampleupload" >> $GITHUB_ENV
+
+    - name: Wait for MongoDB to be ready
+      run: |
+        until nc -zv localhost 27017; do
+          echo "Waiting for MongoDB to start..."
+          sleep 1
+        done
+        echo "MongoDB is ready"
+
+    - name: Configure MongoDB Test Data
+      run: |
+        python scripts/setup_mongodb.py  # Adjust the path to your setup script if necessary
+
     - name: Set up ChromeDriver and Chrome
       uses: browser-actions/setup-chrome@v1
       with:
         chrome-version: 'latest'
 
-    - name: Configure MongoDB Test Data
-      run: |
-        python  scripts/setup_mongodb.py # Run the setup script
-
     - name: Run Selenium Tests
-      
       run: |
         python -m unittest discover -s login_testcases -p "valid.py"
