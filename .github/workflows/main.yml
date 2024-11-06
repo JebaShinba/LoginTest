@@ -52,12 +52,25 @@ jobs:
     - name: List running containers
       run: docker ps
     
+    - name: Wait for MongoDB to be ready
+      run: |
+        while ! nc -zv 127.0.0.1 27017; do  # Check if MongoDB is accepting connections
+          echo "Waiting for MongoDB to start..."
+          sleep 1
+        done
+        echo "MongoDB is ready"
     
 
     - name: Seed MongoDB with test data
       run: |
-        CONTAINER_ID="2237f8a23575"  # Use your container ID here
+        CONTAINER_ID=$(docker ps -q --filter "name=mongodb")  # Fetch container ID dynamically
+        if [ -z "$CONTAINER_ID" ]; then
+          echo "MongoDB container is not running"
+          exit 1
+        fi
+        echo "MongoDB container ID: $CONTAINER_ID"  # Debugging: print container ID
         docker exec $CONTAINER_ID mongo "mongodb://127.0.0.1:27017/sampleupload" --eval 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})'
+    
 
     - name: Set up ChromeDriver and Chrome
       uses: browser-actions/setup-chrome@v1
