@@ -15,6 +15,7 @@ jobs:
         image: mongo:4.4
         ports:
           - 27017:27017
+        options: --health-cmd="curl --silent --fail localhost:27017 || exit 1"  # Health check for MongoDB
 
     steps:
     - name: Checkout code
@@ -30,47 +31,25 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Install MongoDB tools
+    - name: Wait for MongoDB to be ready
       run: |
-        sudo apt-get update
-        # Add the MongoDB GPG key
-        wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | sudo apt-key add -
-        # Add the MongoDB repository
-        echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/4.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.4.list
-        sudo apt-get update
-        # Install mongo-tools via mongodb-org-tools
-        sudo apt-get install -y mongodb-org-tools
-  
+        while ! nc -zv 127.0.0.1 27017; do
+          echo "Waiting for MongoDB to start..."
+          sleep 1
+        done
+        echo "MongoDB is ready"
 
-   # Fetch MongoDB container ID dynamically
     - name: Get MongoDB container ID
       id: mongodb_id
       run: |
           CONTAINER_ID=$(docker ps -q --filter "name=mongodb")
           echo "MongoDB container ID: $CONTAINER_ID"
-          echo "::set-output name=container_id::$CONTAINER_ID"  # Deprecated, will use new method soon
-    - name: List running containers
-      run: docker ps
-    
-    - name: Wait for MongoDB to be ready
-      run: |
-        while ! nc -zv 127.0.0.1 27017; do  # Check if MongoDB is accepting connections
-          echo "Waiting for MongoDB to start..."
-          sleep 1
-        done
-        echo "MongoDB is ready"
-    
+          echo "::set-output name=container_id::$CONTAINER_ID"
 
     - name: Seed MongoDB with test data
       run: |
-        CONTAINER_ID=$(docker ps -q --filter "name=mongodb")  # Fetch container ID dynamically
-        if [ -z "$CONTAINER_ID" ]; then
-          echo "MongoDB container is not running"
-          exit 1
-        fi
-        echo "MongoDB container ID: $CONTAINER_ID"  # Debugging: print container ID
+        CONTAINER_ID=${{ steps.mongodb_id.outputs.container_id }}
         docker exec $CONTAINER_ID mongo "mongodb://127.0.0.1:27017/sampleupload" --eval 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})'
-    
 
     - name: Set up ChromeDriver and Chrome
       uses: browser-actions/setup-chrome@v1
@@ -82,6 +61,3 @@ jobs:
         MONGO_URI: "mongodb://127.0.0.1:27017/sampleupload"
       run: |
         python -m unittest discover -s login_testcases -p "valid.py"
-
-
-
