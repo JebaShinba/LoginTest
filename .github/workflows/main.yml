@@ -49,6 +49,8 @@ jobs:
           CONTAINER_ID=$(docker ps -q --filter "name=mongodb")
           echo "MongoDB container ID: $CONTAINER_ID"
           echo "::set-output name=container_id::$CONTAINER_ID"  # Deprecated, will use new method soon
+    - name: List running containers
+      run: docker ps
 
     - name: Seed MongoDB with test data
       run: |
