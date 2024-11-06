@@ -10,13 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      mongodb:
-        image: mongo:4.4
-        ports:
-          - 27017:27017
-        options: --health-cmd="curl --silent --fail localhost:27017 || exit 1"  # Health check for MongoDB
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -31,30 +24,14 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Wait for MongoDB to be ready
-      run: |
-        while ! nc -zv 127.0.0.1 27017; do
-          echo "Waiting for MongoDB to start..."
-          sleep 1
-        done
-        echo "MongoDB is ready"
-
-    - name: Get MongoDB container ID
-      id: mongodb_id
-      run: |
-          CONTAINER_ID=$(docker ps -q --filter "name=mongodb")
-          echo "MongoDB container ID: $CONTAINER_ID"
-          echo "::set-output name=container_id::$CONTAINER_ID"
-
-    - name: Seed MongoDB with test data
-      run: |
-        CONTAINER_ID=${{ steps.mongodb_id.outputs.container_id }}
-        docker exec $CONTAINER_ID mongo "mongodb://127.0.0.1:27017/sampleupload" --eval 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})'
-
     - name: Set up ChromeDriver and Chrome
       uses: browser-actions/setup-chrome@v1
       with:
         chrome-version: 'latest'
+
+    - name: Configure MongoDB Test Data
+      run: |
+        python configfile\config.py  # Run the setup script
 
     - name: Run Selenium Tests
       env:
