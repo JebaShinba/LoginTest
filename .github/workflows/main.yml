@@ -34,7 +34,6 @@ jobs:
         python  scripts/setup_mongodb.py # Run the setup script
 
     - name: Run Selenium Tests
-      env:
-        MONGO_URI: "mongodb://127.0.0.1:27017/sampleupload"
+      
       run: |
         python -m unittest discover -s login_testcases -p "valid.py"
