@@ -1,7 +1,12 @@
 # scripts/setup_mongodb.py
 import sys
-sys.path.insert(0, './LoginTest/configfile')  # Adjust the path
-import config
+import os
+
+# Add the config file's directory to PYTHONPATH
+sys.path.append(os.path.join(os.path.dirname(__file__), '../LoginTest/configfile'))
+
+import config  # Now it should find config.py
+
 from pymongo import MongoClient
 
 client = MongoClient("mongodb://127.0.0.1:27017")
