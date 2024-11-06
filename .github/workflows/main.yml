@@ -51,11 +51,14 @@ jobs:
           echo "::set-output name=container_id::$CONTAINER_ID"  # Deprecated, will use new method soon
     - name: List running containers
       run: docker ps
+    - name: View MongoDB logs
+      run: docker logs $CONTAINER_ID
+    
 
     - name: Seed MongoDB with test data
       run: |
-          CONTAINER_ID=${{ steps.mongodb_id.outputs.container_id }}
-          docker exec $CONTAINER_ID mongo "mongodb://127.0.0.1:27017/sampleupload" --eval 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})'
+        CONTAINER_ID="2237f8a23575"  # Use your container ID here
+        docker exec $CONTAINER_ID mongo "mongodb://127.0.0.1:27017/sampleupload" --eval 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})'
 
     - name: Set up ChromeDriver and Chrome
       uses: browser-actions/setup-chrome@v1
