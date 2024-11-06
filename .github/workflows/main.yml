@@ -44,8 +44,7 @@ jobs:
 
     - name: Seed MongoDB with test data
       run: |
-        echo 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})' | mongo "mongodb://127.0.0.1:27017/sampleupload"
-
+        docker exec mongodb mongo "mongodb://127.0.0.1:27017/sampleupload" --eval 'db.users.insertOne({"username": "testuser", "password": "testpass", "baseurl": "https://demo.filebrowser.org/login?redirect=/files/", "is_valid": true})'
     - name: Set up ChromeDriver and Chrome
       uses: browser-actions/setup-chrome@v1
       with:
