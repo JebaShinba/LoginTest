@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import unittest
 import sys
 from homeobjects.login import LoginPage
@@ -16,7 +17,14 @@ class ValidLoginTest(unittest.TestCase):
         cls_users_collection = cls.db["users"]  # Use your actual collection name
 
         # Fetch valid user credentials from MongoDB
-        cls.driver = webdriver.Chrome()
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  # Enable headless mode
+        chrome_options.add_argument("--no-sandbox")  # Recommended for certain environments
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+        chrome_options.add_argument("--disable-gpu")  # Disable GPU for headless mode
+        chrome_options.add_argument("--window-size=1920,1080")  # Set window size if needed
+
+        cls.driver = webdriver.Chrome(options=chrome_options)
         cls.driver.implicitly_wait(5)
 
         # Retrieve only valid users
