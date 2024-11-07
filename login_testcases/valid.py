@@ -13,8 +13,8 @@ class ValidLoginTest(unittest.TestCase):
     def setUpClass(cls):
         # Initialize the MongoDB client
         cls.client = MongoClient("mongodb://127.0.0.1:27017/")  # Update this URI as necessary
-        cls.db = cls.client["sampleupload"]  # Use your actual database name
-        cls_users_collection = cls.db["users"]  # Use your actual collection name
+        cls.db = cls.client["test_db"]  # Use your actual database name
+        cls_users_collection = cls.db["test_collection"]  # Use your actual collection name
 
         # Fetch valid user credentials from MongoDB
         chrome_options = Options()

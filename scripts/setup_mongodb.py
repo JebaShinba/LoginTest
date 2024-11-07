@@ -21,9 +21,22 @@ def setup_mongodb():
 
     # Example: Insert some test documents
     sample_data = [
-    {"username": "testuser1", "password": "password123", "email": "user1@test.com", "is_valid": True},
-    {"username": "testuser2", "password": "password456", "email": "user2@test.com", "is_valid": True}
-]
+        {
+            "username": "testuser1", 
+            "password": "password123", 
+            "email": "user1@test.com", 
+            "is_valid": True, 
+            "baseurl": "https://demo.filebrowser.org/login?redirect=/files/"
+        },
+        {
+            "username": "testuser2", 
+            "password": "password456", 
+            "email": "user2@test.com", 
+            "is_valid": False, 
+            "baseurl": "https://demo.filebrowser.org/login?redirect=/files/"
+        }
+    ]
+    
     collection.insert_many(sample_data)
     print(f"Test data inserted into {db.name}.{collection.name}")
 
