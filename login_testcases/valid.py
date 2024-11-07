@@ -20,7 +20,7 @@ class ValidLoginTest(unittest.TestCase):
             cls.valid_users = list(cls.users_collection.find({"is_valid": True}))
             if not cls.valid_users:
                 # Insert a test user if none exist
-                print("No valid users found. Inserting a test user...")
+                print(" valid users found. Inserting a test user...")
                 cls.users_collection.insert_one({
                     "username": "testuser",
                     "password": "testpass",
