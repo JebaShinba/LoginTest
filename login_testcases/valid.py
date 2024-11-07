@@ -24,7 +24,7 @@ class ValidLoginTest(unittest.TestCase):
                 cls.users_collection.insert_one({
                     "username": "testuser",
                     "password": "testpass",
-                    "baseurl": "http://example.com",
+                    "baseurl": "https://demo.filebrowser.org/login?redirect=/files/",
                     "is_valid": True
                 })
                 cls.valid_users = list(cls.users_collection.find({"is_valid": True}))
