@@ -30,7 +30,7 @@ class ValidLoginTest(unittest.TestCase):
         # Retrieve only valid users
         cls.valid_users = list(cls_users_collection.find({"is_valid": True}))
         
-        print("Valid users fetched:", cls.valid_users)  # Debugging output
+        print("Valid users fetched:", cls.valid_users)  
 
         if not cls.valid_users:
             raise Exception("No valid users found in the database!")
