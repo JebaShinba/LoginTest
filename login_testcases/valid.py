@@ -3,7 +3,7 @@ from selenium.webdriver.chrome.options import Options
 import unittest
 import sys
 from homeobjects.login import LoginPage
-from configfile.config import MongoClient  # Assuming MongoClient is defined in config
+from scripts.setup_mongodb import MongoClient  # Assuming MongoClient is defined in config
 
 class ValidLoginTest(unittest.TestCase):
     valid_users = []
