@@ -33,12 +33,12 @@ jobs:
     
     - name: Set PYTHONPATH
       run: |
-        echo "PYTHONPATH=$PYTHONPATH:$GITHUB_WORKSPACE/LoginTest/configfile" >> $GITHUB_ENV
+        echo "PYTHONPATH=$PYTHONPATH:$GITHUB_WORKSPACE/LoginTest/scripts" >> $GITHUB_ENV
 
     - name: Set Environment Variables
       run: |
-        echo "PYTHONPATH=$PWD/login_test/homeobjects:$PWD/LoginTest/configfile/config.py" >> $GITHUB_ENV
-        echo "MONGO_URI=mongodb://127.0.0.1:27017/sampleupload" >> $GITHUB_ENV
+        echo "PYTHONPATH=$PWD/login_test/homeobjects:$PWD/LoginTest/scripts/setup_mongodb.py" >> $GITHUB_ENV
+        echo "MONGO_URI=mongodb://127.0.0.1:27017/test_db" >> $GITHUB_ENV
 
     - name: Wait for MongoDB to be ready
       run: |
