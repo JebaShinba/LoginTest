@@ -59,9 +59,17 @@ jobs:
     - name: Show Test Results Log
       run: cat  test_results.log 
 
-    - name: Send Failure Email Notification
-      if: failure()
-      run: |
-          echo "Tests failed! Sending email notification..."
-          python send_email_notification.py "Tests failed on release push"
     
+    - name: Send Email Notification
+      run: |
+        if [ "${{ steps.test_run.outcome }}" == "success" ]; then
+          python test_google.py success
+        else
+          python test_google.py failure
+        fi
+      env:
+        SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}  # Store sender email in GitHub secrets
+        SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}  # Store sender password in GitHub secrets
+        RECIPIENT_EMAIL: jeba@nidrive.in  # Store recipient email in GitHub secrets
+
+
