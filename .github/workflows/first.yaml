@@ -47,10 +47,15 @@ jobs:
           sleep 1
         done
         echo "MongoDB is ready"
-
+    - name: Make run_tests.sh executable
+      run: chmod +x ./run_tests.sh
+      
+    - name: Run tests
+      run: ./run_tests.sh
+    
     - name: Run Selenium Tests
       run: ./run_tests.sh
-      continue-on-error: true  # Allows capturing failure for the email step
+      continue-on-error: true  
       id: selenium_test
 
     - name: Show Test Results Log
