@@ -62,7 +62,7 @@ jobs:
     
     - name: Send Email Notification
       run: |
-        if [ "${{ steps.test_run.outcome }}" == "success" ]; then
+        if [ "${{ steps.test_run.outcome }}" == "success or failure" ]; then
           python send_email_notification.py success
         else
           python send_email_notification.py failure

@@ -1,0 +1,48 @@
+name: Release Push CI
+
+on:
+  push:
+    paths:
+      - 'release/**'  # Trigger when there's a push to the release folder
+
+jobs:
+  release_push:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    # Step 2: Download the release documentation (for example, from a URL or repo)
+    - name: Download Release Document
+      run: |
+        echo "Downloading release document..."
+        curl -o release_doc.pdf https://example.com/release-doc.pdf
+
+    # Step 3: Install dependencies (excluding Docker)
+    - name: Install Dependencies
+      run: |
+        echo "Installing dependencies from requirements.txt (excluding Docker)..."
+        pip install --no-cache-dir -r requirements.txt --ignore-installed docker
+
+    # Step 4: Run the shell script to invoke the Selenium scripts
+    - name: Run Shell Script
+      run: |
+        echo "Running the Selenium tests..."
+        chmod +x run_selenium_tests.sh
+        ./run_selenium_tests.sh
+
+    # Step 5: Show Test Results Logs
+    - name: Display Test Results Log
+      run: |
+        echo "Displaying test results log..."
+        cat test_results.log
+
+    # Step 6: Send Failure Email Notification if tests failed
+    - name: Send Failure Email Notification
+      if: failure()  # Trigger this step only if previous steps failed
+      run: |
+        echo "Tests failed! Sending email notification..."
+        python send_email_notification.py "Tests failed on release push"
+
