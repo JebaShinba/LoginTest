@@ -52,7 +52,7 @@ jobs:
       
     - name: Run tests
       run: python run.py > test_results.log || exit 0
-           cat test_results.log    # Display test results for debugging
+           cat test_results.log    # Display test results for 
     
     
 
