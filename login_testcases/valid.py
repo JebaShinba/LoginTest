@@ -18,7 +18,7 @@ class ValidLoginTest(unittest.TestCase):
 
         # Fetch valid user credentials from MongoDB
         chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Enable headless mode
+        chrome_options.add_argument("--headless")  
         chrome_options.add_argument("--no-sandbox")  # Recommended for certain environments
         chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
         chrome_options.add_argument("--disable-gpu")  # Disable GPU for headless mode
