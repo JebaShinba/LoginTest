@@ -63,9 +63,9 @@ jobs:
     - name: Send Email Notification
       run: |
         if [ "${{ steps.test_run.outcome }}" == "success" ]; then
-          python test_google.py success
+          python send_email_notification.py success
         else
-          python test_google.py failure
+          python send_email_notification.py failure
         fi
       env:
         SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}  # Store sender email in GitHub secrets
