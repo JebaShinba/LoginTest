@@ -2,13 +2,18 @@ import subprocess
 import os
 
 print("Starting Selenium Tests...")
+print("Current working directory:", os.getcwd())
 
-# Get the existing environment and add PYTHONPATH
 env = os.environ.copy()
-env["PYTHONPATH"] = "C:/Users/jebas/LoginTest"
+env["PYTHONPATH"] = os.path.abspath(".")
 
-# Run each Selenium test script with the modified environment
-subprocess.run(["python", "C:/Users/jebas/LoginTest/scripts/setup_mongodb.py"], env=env)
-subprocess.run(["python", "C:/Users/jebas/LoginTest/login_testcases/valid.py"], env=env)
+try:
+    subprocess.run(["python", "./scripts/setup_mongodb.py"], env=env, check=True)
+    subprocess.run(["python", "./login_testcases/valid.py"], env=env, check=True)
+except FileNotFoundError as e:
+    print(f"File not found: {e}")
+except subprocess.CalledProcessError as e:
+    print(f"Error during script execution: {e}")
 
 print("All tests completed.")
+
