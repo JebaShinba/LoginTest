@@ -25,7 +25,7 @@ def setup_mongodb():
             "username": "testuser1", 
             "password": "password123", 
             "email": "user1@test.com", 
-            "is_valid": True, 
+            "is_valid": False, 
             "baseurl": "https://demo.filebrowser.org/login?redirect=/files/"
         },
         {
