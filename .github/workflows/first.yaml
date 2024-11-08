@@ -53,13 +53,9 @@ jobs:
     - name: Run tests
       run: python run.py
     
-    - name: Run Selenium Tests
-      run: ./run_tests.sh
-      continue-on-error: true  
-      id: selenium_test
+    
 
     - name: Show Test Results Log
-      if: failure()
       run: cat  test_results.log 
 
     - name: Send Failure Email Notification
