@@ -60,7 +60,7 @@ jobs:
 
     - name: Show Test Results Log
       if: failure()
-      run: cat  test_results.log .log  # Modify as per the actual log file path
+      run: cat  test_results.log 
 
     - name: Send Failure Email Notification
       if: failure()
