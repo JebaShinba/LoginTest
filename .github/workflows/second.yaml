@@ -33,7 +33,7 @@ jobs:
         chmod +x run_tests.sh
         ./run_tests.sh
 
-    # Step 5: Show Test Results Logs
+    # Step 5: Show 
     - name: Display Test Results Log
       run: |
         echo "Displaying test results log..."
