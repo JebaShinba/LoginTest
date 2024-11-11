@@ -1,7 +1,9 @@
 name: Release Push CI
 
 on:
+ 
   push:
+    branches: [main]
     paths:
       - 'release/**'  # Trigger when there's a push to the release folder
 
@@ -25,6 +27,26 @@ jobs:
       run: |
         echo "Installing dependencies from requirements.txt (excluding Docker)..."
         pip install --no-cache-dir -r requirements.txt --ignore-installed docker
+
+        - name: Set PYTHONPATH
+        run: |
+          echo "PYTHONPATH=$PYTHONPATH:$GITHUB_WORKSPACE/LoginTest/scripts" >> $GITHUB_ENV
+  
+    - name: Set Environment Variables
+      run: |
+          echo "PYTHONPATH=$PWD/login_test/homeobjects:$PWD/LoginTest/scripts/setup_mongodb.py" >> $GITHUB_ENV
+          echo "MONGO_URI=mongodb://127.0.0.1:27017/test_db" >> $GITHUB_ENV
+  
+    - name: Wait for MongoDB to be ready
+      run: |
+          until nc -zv localhost 27017; do
+            echo "Waiting for MongoDB to start..."
+            sleep 1
+          done
+          echo "MongoDB is ready"
+    - name: Make run_tests.sh executable
+      run: chmod +x ./run_tests.sh
+        
 
     # Step 4: Run the shell script to invoke the Selenium scripts
     - name: Run Shell Script
