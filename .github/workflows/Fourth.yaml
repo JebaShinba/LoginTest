@@ -19,15 +19,18 @@ jobs:
       run: |
         echo "Downloading release document..."
         curl -o release_doc.pdf https://example.com/release-doc.pdf
-
-    # Step 3: Install dependencies (excluding Docker)
-    - name: Install Dependencies
+    
+    - name: Install dependencies
       run: |
-        echo "Installing dependencies from requirements.txt (excluding Docker)..."
-        pip install --no-cache-dir -r requirements.txt --ignore-installed docker
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+    
+    
+    
 
-        - name: Set PYTHONPATH
-        run: |
+    
+    - name: Set PYTHONPATH
+      run: |
           echo "PYTHONPATH=$PYTHONPATH:$GITHUB_WORKSPACE/LoginTest/scripts" >> $GITHUB_ENV
   
     - name: Set Environment Variables
