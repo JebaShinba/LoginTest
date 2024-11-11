@@ -31,7 +31,7 @@ jobs:
       run: |
         echo "Running the Selenium tests..."
         chmod +x run_selenium_tests.sh
-        ./run_selenium_tests.sh
+        ./run_tests.sh
 
     # Step 5: Show Test Results Logs
     - name: Display Test Results Log
