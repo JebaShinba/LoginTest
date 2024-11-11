@@ -89,9 +89,13 @@ jobs:
         
 
     # Step 4: Run the shell script to invoke the Selenium scripts
-    - name: Run Shell Script
-      run: sh ./run_tests.sh
+    - name: Run Shell Script using PowerShell
       shell: pwsh
+      run: |
+          echo "Running the Selenium tests..."
+          chmod +x ./run_tests.sh
+          bash ./run_tests.sh    # Call bash explicitly from pwsh
+  
 
     # Step 5: Show 
     - name: Display Test Results Log
