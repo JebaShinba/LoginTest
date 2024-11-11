@@ -34,8 +34,17 @@ jobs:
         mkdir -p downloaded_release_assets
         gh release download ${{ github.event.release.tag_name }} --dir downloaded_release_assets
 
-    # Optional: List downloaded files
-    - name: List downloaded files
+    - name: Check if release file exists and unzip
+      run: |
+        if [ -f "./downloaded_release_assets/release-file.zip" ]; then
+          echo "File exists, proceeding to unzip..."
+          unzip ./downloaded_release_assets/release-file.zip -d ./downloaded_release_files
+        else
+          echo "File not found, skipping unzip."
+        fi
+
+    - name: List Downloaded Files
       run: |
         echo "Downloaded files:"
-        ls downloaded_release_assets
+        ls ./downloaded_release_assets
+
