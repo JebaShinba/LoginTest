@@ -1,0 +1,34 @@
+name: Release Download CI
+
+on:
+  release:
+    types: [published]  # Trigger only when a release is published
+
+jobs:
+  download_release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
+
+    - name: Download release asset
+      uses: actions/download-release-asset@v21
+      with:
+        repo: ${{ github.repository }}  # This repository
+        tag: ${{ github.event.release.tag_name }}  # Tag of the release
+        token: ${{ secrets.GITHUB_TOKEN }}  # Access token for private repos
+        asset_name: "release-file.zip"  # Name of the asset in the release
+        output_dir: ./downloaded_release_assets  # Specify where to save the downloaded files
+
+    # Optional: Extract the asset if it's a zip file
+    - name: Extract Release Asset
+      if: exists('./downloaded_release_assets/release-file.zip')
+      run: |
+        unzip ./downloaded_release_assets/release-file.zip -d ./downloaded_release_files
+
+    # Step to verify the downloaded content
+    - name: List Downloaded Files
+      run: |
+        echo "Downloaded files:"
+        ls ./downloaded_release_assets
