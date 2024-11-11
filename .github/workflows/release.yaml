@@ -21,7 +21,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+        # Auth login using the GITHUB_TOKEN, no need to store it locally
+        gh auth login --with-token <<< "${{ secrets.GITHUB_TOKEN }}"
+
 
     - name: List release assets
       run: |
