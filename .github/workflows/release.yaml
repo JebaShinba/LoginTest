@@ -2,33 +2,40 @@ name: Release Download CI
 
 on:
   release:
-    types: [published]  # Trigger only when a release is published
+    types: [published]  # Trigger on new release publication
 
 jobs:
   download_release:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout the repository
+    - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Download release asset
-      uses: actions/download-release-asset@v2
-      with:
-        repo: ${{ github.repository }}  # This repository
-        tag: ${{ github.event.release.tag_name }}  # Tag of the release
-        token: ${{ secrets.GITHUB_TOKEN }}  # Access token for private repos
-        asset_name: "release-file.zip"  # Name of the asset in the release
-        output_dir: ./downloaded_release_assets  # Specify where to save the downloaded files
-
-    # Optional: Extract the asset if it's a zip file
-    - name: Extract Release Asset
-      if: exists('./downloaded_release_assets/release-file.zip')
+    - name: Set up GitHub CLI
       run: |
-        unzip ./downloaded_release_assets/release-file.zip -d ./downloaded_release_files
+        sudo apt-get update
+        sudo apt-get install -y gh
 
-    # Step to verify the downloaded content
-    - name: List Downloaded Files
+    - name: Authenticate GitHub CLI
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+    - name: List release assets
+      run: |
+        gh release view ${{ github.event.release.tag_name }} --json assets --jq '.assets[].name'
+
+    - name: Download release assets
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        mkdir -p downloaded_release_assets
+        gh release download ${{ github.event.release.tag_name }} --dir downloaded_release_assets
+
+    # Optional: List downloaded files
+    - name: List downloaded files
       run: |
         echo "Downloaded files:"
-        ls ./downloaded_release_assets
+        ls downloaded_release_assets
