@@ -13,7 +13,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Download release asset
-      uses: actions/download-release-asset@v21
+      uses: actions/download-release-asset@v2
       with:
         repo: ${{ github.repository }}  # This repository
         tag: ${{ github.event.release.tag_name }}  # Tag of the release
