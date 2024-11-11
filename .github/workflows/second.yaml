@@ -30,7 +30,7 @@ jobs:
     - name: Run Shell Script
       run: |
         echo "Running the Selenium tests..."
-        chmod +x run_selenium_tests.sh
+        chmod +x run_tests.sh
         ./run_tests.sh
 
     # Step 5: Show Test Results Logs
