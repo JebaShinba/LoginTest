@@ -2,24 +2,18 @@
 
 echo "Starting Selenium Tests..."
 
-# Define the Windows path
+# Define the path for the project
 script_path="C:/Users/jebas/LoginTest"
 
-# Convert Windows path to Unix path for WSL/Git Bash
-script_path_unix=$(echo "$script_path" | sed 's|C:|/mnt/c|')
+# Add LoginTest to PYTHONPATH
+export PYTHONPATH="$script_path"
 
-# Debugging: Print the converted path
-echo "Converted path: $script_path_unix"
-
-# Check if the files exist
-echo "Running MongoDB script at: $script_path_unix/scripts/setup_mongodb.py"
-echo "Running Valid Test script at: $script_path_unix/login_testcases/valid.py"
-
-# Run each Selenium test script using Python
-python "$script_path_unix/scripts/setup_mongodb.py"
-python "$script_path_unix/login_testcases/valid.py"
+# Run each Selenium test script using Windows-style paths
+python "$script_path/scripts/setup_mongodb.py"
+python "$script_path/login_testcases/valid.py"
 
 echo "All tests completed."
+
 
 
 
