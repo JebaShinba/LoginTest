@@ -1,39 +1,44 @@
-name: CI/CD Pipeline for Auto Release
+name: Auto Release on Push to Main
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+  
+permissions:
+  contents: write
+  actions: read
 
 jobs:
   release:
-    runs-on: ubuntu-latest  # You can change this to windows-latest if you're working on Windows
+    runs-on: ubuntu-latest  # This job runs on Ubuntu
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Optional step to generate the zip file for release
+      # Optional: Step to generate the zip file
       - name: Generate zip file
         run: |
           mkdir -p output
           echo "Sample content" > output/sample.txt
           zip -r filename.zip output/
 
-      - name: Create Version Tag
-        id: version
+      - name: Generate Version Tag
+        id: generate_tag
         run: |
           VERSION="v$(date +'%Y.%m.%d-%H%M%S')"
           echo "version=$VERSION" >> $GITHUB_ENV
 
-      - name: Create Git Tag and Release
+      - name: Create Git Tag
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ env.version }}
           git push origin ${{ env.version }}
 
-      - name: Create GitHub Release
+      - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -51,14 +56,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./filename.zip
+          asset_path: ./filename.zip  # Ensure this path is correct
           asset_name: filename.zip
           asset_content_type: application/zip
 
+      - name: List files in the current directory
+        run: ls -l
+
   download_release:
-    runs-on: windows-latest  # Use a Windows runner to run PowerShell script
+    runs-on: windows-latest  # This job runs on Windows
+
     steps:
-      - name: Download Release Asset
+      - name: Download Release Asset Using PowerShell
         run: |
           # Define variables
           $versionTag = "v2024.11.12-043105"
@@ -77,3 +86,5 @@ jobs:
           } else {
               Write-Output "No asset named 'filename.zip' was found in the release."
           }
+
+
