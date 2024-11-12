@@ -60,40 +60,26 @@ jobs:
           asset_name: filename.zip
           asset_content_type: application/zip
 
+      # Upload the artifact for future download
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: ./filename.zip  # Ensure this is the correct path to the file you want to upload
+
       - name: List files in the current directory
         run: ls -l
 
-  download_release:
-    runs-on: windows-latest  # This job runs on Windows
-    needs: release  # Ensure it runs after the release job
-
-    steps:
-      - name: Download Release Asset Using PowerShell
-        run: |
-          # Define variables
-          $versionTag = "v2024.11.12-043105"
-          $repo = "JebaShinba/LoginTest"
-
-          # Fetch the release data for the specified tag
-          $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/tags/$versionTag" -UseBasicParsing
-
-          # Extract the download URL for the asset named 'filename.zip'
-          $downloadUrl = ($response.assets | Where-Object { $_.name -eq "filename.zip" }).browser_download_url
-
-          # Check if the URL was found, then download the asset
-          if ($downloadUrl) {
-              Invoke-WebRequest -Uri $downloadUrl -OutFile "downloaded_filename.zip"
-              Write-Output "Downloaded file saved as downloaded_filename.zip in the current directory."
-          } else {
-              Write-Output "No asset named 'filename.zip' was found in the release."
-          }
-
   download:
     runs-on: ubuntu-latest
-    needs: release  # Ensure it runs after the release job
+    needs: release  # Ensure this job runs only after the release job is finished
     steps:
-      - name: Download artifact
+      - name: Download Artifact
         uses: actions/download-artifact@v3
         with:
           name: my-artifact
           path: ./downloaded_files  # Specify the local directory to save the file
+
+      - name: List files in the downloaded directory
+        run: ls -l ./downloaded_files
+
