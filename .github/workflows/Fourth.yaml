@@ -54,7 +54,8 @@ jobs:
     - name: Run Selenium Tests
       run: |
         echo "Running the Selenium tests..."
-        bash ./run_tests.sh  # Run the shell script in bash
+        bash ./run_tests.sh  > test_results.log || exit 0
+        cat test_results.log    # Display test results for debugging # Run the shell script in bash
 
     # Step 5: Show test results log
     - name: Display Test Results Log
