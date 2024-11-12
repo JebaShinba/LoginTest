@@ -10,10 +10,9 @@ permissions:
   contents: write
   actions: read
 
-
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # This job runs on Ubuntu
 
     steps:
       - name: Checkout code
@@ -61,17 +60,31 @@ jobs:
           asset_name: filename.zip
           asset_content_type: application/zip
 
-            # (Optional) Download the asset after uploading to verify in the workflow
-      - name: Download Release Asset
-        run: |
-          URL=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.version }} \
-            | grep "browser_download_url.*filename.zip" \
-            | cut -d : -f 2,3 \
-            | tr -d \")
-          curl -L -o downloaded_filename.zip $URL
-
-
       - name: List files in the current directory
         run: ls -l
+
+  download_release:
+    runs-on: windows-latest  # This job runs on Windows
+
+    steps:
+      - name: Download Release Asset Using PowerShell
+        run: |
+          # Define variables
+          $versionTag = "v2024.11.12-043105"
+          $repo = "JebaShinba/LoginTest"
+
+          # Fetch the release data for the specified tag
+          $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/tags/$versionTag" -UseBasicParsing
+
+          # Extract the download URL for the asset named 'filename.zip'
+          $downloadUrl = ($response.assets | Where-Object { $_.name -eq "filename.zip" }).browser_download_url
+
+          # Check if the URL was found, then download the asset
+          if ($downloadUrl) {
+              Invoke-WebRequest -Uri $downloadUrl -OutFile "downloaded_filename.zip"
+              Write-Output "Downloaded file saved as downloaded_filename.zip in the current directory."
+          } else {
+              Write-Output "No asset named 'filename.zip' was found in the release."
+          }
 
 
