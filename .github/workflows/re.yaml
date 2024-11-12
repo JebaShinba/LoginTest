@@ -70,3 +70,8 @@ jobs:
             | tr -d \")
           curl -L -o downloaded_filename.zip $URL
 
+
+      - name: List files in the current directory
+        run: ls -l
+
+
