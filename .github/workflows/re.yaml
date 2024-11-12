@@ -1,0 +1,60 @@
+name: Auto Release on Push to Main
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Generate a new tag based on the latest commit hash or a versioning scheme
+      - name: Generate Tag
+        id: generate_tag
+        run: |
+          # Here we set the version tag (e.g., v1.0.0 or use a dynamic versioning scheme)
+          # For a simplified example, we'll use the current date and time.
+          # You can replace this logic with your own versioning strategy.
+          VERSION="v$(date +'%Y.%m.%d-%H%M%S')"
+          echo "Generated version tag: $VERSION"
+          echo "version=$VERSION" >> $GITHUB_ENV
+
+      - name: Create Git Tag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ env.version }}
+          git push origin ${{ env.version }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.version }}
+          release_name: "Release ${{ env.version }}"
+          body: "Automatic release for version ${{ env.version }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: filename.zip   # Replace with the actual file path
+          asset_name: filename.zip  # Replace with the desired file name
+          asset_content_type: application/zip
