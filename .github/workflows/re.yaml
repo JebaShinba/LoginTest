@@ -6,10 +6,10 @@ on:
       - main
   workflow_dispatch:
   
-
 permissions:
   contents: write
   actions: read
+
 
 jobs:
   release:
@@ -19,15 +19,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Generate a new tag based on the latest commit hash or a versioning scheme
-      - name: Generate Tag
+      # Optional: Step to generate the zip file
+      - name: Generate zip file
+        run: |
+          mkdir -p output
+          echo "Sample content" > output/sample.txt
+          zip -r filename.zip output/
+
+      - name: Generate Version Tag
         id: generate_tag
         run: |
-          # Here we set the version tag (e.g., v1.0.0 or use a dynamic versioning scheme)
-          # For a simplified example, we'll use the current date and time.
-          # You can replace this logic with your own versioning strategy.
           VERSION="v$(date +'%Y.%m.%d-%H%M%S')"
-          echo "Generated version tag: $VERSION"
           echo "version=$VERSION" >> $GITHUB_ENV
 
       - name: Create Git Tag
@@ -55,6 +57,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: filename.zip   # Replace with the actual file path
-          asset_name: filename.zip  # Replace with the desired file name
+          asset_path: ./filename.zip  # Ensure this path is correct
+          asset_name: filename.zip
           asset_content_type: application/zip
