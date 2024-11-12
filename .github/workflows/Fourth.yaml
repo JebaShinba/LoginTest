@@ -1,11 +1,14 @@
 name: Release Push CI
 
 on:
-  push:
-    branches: [main]
+  
+   
+  release:
+    types: [published]
+
 
 jobs:
-  release_push:
+  trigger_on_release:
     runs-on: ubuntu-latest
     services:
       mongodb:
@@ -55,9 +58,7 @@ jobs:
 
     # Step 5: Show test results log
     - name: Display Test Results Log
-      run: |
-        echo "Displaying test results log..."
-        cat test_results.log
+      run: cat test_results.log
 
     # Step 6: Send Failure Email Notification if tests failed
     - name: Send Failure Email Notification
