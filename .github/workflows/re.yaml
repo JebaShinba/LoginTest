@@ -60,3 +60,13 @@ jobs:
           asset_path: ./filename.zip  # Ensure this path is correct
           asset_name: filename.zip
           asset_content_type: application/zip
+
+            # (Optional) Download the asset after uploading to verify in the workflow
+      - name: Download Release Asset
+        run: |
+          URL=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.version }} \
+            | grep "browser_download_url.*filename.zip" \
+            | cut -d : -f 2,3 \
+            | tr -d \")
+          curl -L -o downloaded_filename.zip $URL
+
