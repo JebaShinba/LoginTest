@@ -1,45 +1,39 @@
-name: Auto Release on Push to Main
+name: CI/CD Pipeline for Auto Release
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-  
-permissions:
-  contents: write
-  actions: read
-
 
 jobs:
   release:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-latest  # You can change this to windows-latest if you're working on Windows
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Optional: Step to generate the zip file
+      # Optional step to generate the zip file for release
       - name: Generate zip file
         run: |
           mkdir -p output
           echo "Sample content" > output/sample.txt
           zip -r filename.zip output/
 
-      - name: Generate Version Tag
-        id: generate_tag
+      - name: Create Version Tag
+        id: version
         run: |
           VERSION="v$(date +'%Y.%m.%d-%H%M%S')"
           echo "version=$VERSION" >> $GITHUB_ENV
 
-      - name: Create Git Tag
+      - name: Create Git Tag and Release
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git tag ${{ env.version }}
           git push origin ${{ env.version }}
 
-      - name: Create Release
+      - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -57,21 +51,29 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./filename.zip  # Ensure this path is correct
+          asset_path: ./filename.zip
           asset_name: filename.zip
           asset_content_type: application/zip
 
-            # (Optional) Download the asset after uploading to verify in the workflow
+  download_release:
+    runs-on: windows-latest  # Use a Windows runner to run PowerShell script
+    steps:
       - name: Download Release Asset
         run: |
-          URL=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.version }} \
-            | grep "browser_download_url.*filename.zip" \
-            | cut -d : -f 2,3 \
-            | tr -d \")
-          curl -L -o downloaded_filename.zip $URL
+          # Define variables
+          $versionTag = "v2024.11.12-043105"
+          $repo = "JebaShinba/LoginTest"
 
+          # Fetch the release data for the specified tag
+          $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/tags/$versionTag" -UseBasicParsing
 
-      - name: List files in the current directory
-        run: ls -l
+          # Extract the download URL for the asset named 'filename.zip'
+          $downloadUrl = ($response.assets | Where-Object { $_.name -eq "filename.zip" }).browser_download_url
 
-
+          # Check if the URL was found, then download the asset
+          if ($downloadUrl) {
+              Invoke-WebRequest -Uri $downloadUrl -OutFile "downloaded_filename.zip"
+              Write-Output "Downloaded file saved as downloaded_filename.zip in the current directory."
+          } else {
+              Write-Output "No asset named 'filename.zip' was found in the release."
+          }
