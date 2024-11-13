@@ -93,6 +93,12 @@ jobs:
           $versionTag = "v2024.11.12-043105"
           $repo = "JebaShinba/LoginTest"
           $downloadPath = "C:\\Users\\jebas\\LoginTest\\downloaded_filename.zip"  # Set the path where the file will be saved
+          $downloadDir = [System.IO.Path]::GetDirectoryName($downloadPath)  # Extract the directory path
+
+          # Ensure the directory exists
+          if (!(Test-Path -Path $downloadDir)) {
+              New-Item -ItemType Directory -Path $downloadDir | Out-Null
+          }
 
           # Fetch the release data for the specified tag
           $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/tags/$versionTag" -UseBasicParsing
