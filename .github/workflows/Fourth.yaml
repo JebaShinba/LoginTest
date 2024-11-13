@@ -2,12 +2,14 @@ name: Release Push CI
 
 on:
   
-    workflow_run:
-      workflows: ["Auto Release on Push to Main"]  # Specify the workflow(s) to watch
-      types:
-        - completed
-    release:
-      types: [published]
+   
+  workflow_run:
+    workflows: ["Auto Release on Push to Main"]  # Specify the workflow(s) to watch
+    types:
+      - completed
+  release:
+    types: [published]
+    
 
 
 jobs:
