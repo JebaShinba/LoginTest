@@ -5,8 +5,7 @@ on:
    branches:
       - main
   workflow_dispatch:
-  release:
-    types: [published]
+  
 
 
 jobs:
