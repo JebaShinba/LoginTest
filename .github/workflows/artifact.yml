@@ -1,4 +1,4 @@
-name: Download and Deploy Artifact
+name: Auto Release on Push to Main
 
 on:
   push:
@@ -6,60 +6,112 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
-  download-and-deploy:
-    runs-on: ubuntu-latest
+  release:
+    runs-on: ubuntu-latest  # This job runs on Ubuntu
 
     steps:
-      # Step 1: Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Set up GitHub CLI (GH CLI)
-      - name: Set up GitHub CLI
+      # Optional: Step to generate the zip file
+      - name: Generate zip file
         run: |
-          sudo apt-get install gh
+          mkdir -p output
+          echo "Sample content" > output/sample.txt
+          zip -r filename.zip output/
 
-      # Step 3: Authenticate with GitHub CLI using the GitHub token
-      - name: Authenticate GitHub CLI
+      - name: Generate Version Tag
+        id: generate_tag
+        run: |
+          VERSION="v$(date +'%Y.%m.%d-%H%M%S')"
+          echo "version=$VERSION" >> $GITHUB_ENV
+
+      - name: Create Git Tag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ env.version }}
+          git push origin ${{ env.version }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
-          GH_TOKEN: ${{ github.token }}  # Use GitHub's default token
-        run: |
-          gh auth login --with-token <<< $GH_TOKEN
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.version }}
+          release_name: "Release ${{ env.version }}"
+          body: "Automatic release for version ${{ env.version }}"
+          draft: false
+          prerelease: false
 
-      # Step 4: List Workflow Runs
-      - name: List Workflow Runs
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./filename.zip  # Ensure this path is correct
+          asset_name: filename.zip
+          asset_content_type: application/zip
+
+      # Upload the artifact for future download
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-artifact
+          path: ./filename.zip  # Ensure this is the correct path to the file you want to upload
+
+      - name: List files in the current directory
+        run: ls -l
+
+  download:
+    runs-on: ubuntu-latest
+    needs: release  # Ensure this job runs only after the release job is finished
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: my-artifact
+          path: ./downloaded_files  # Specify the local directory to save the file
+
+      - name: List files in the downloaded directory
+        run: ls -l ./downloaded_files
+
+  download_release:
+    runs-on: windows-latest  # This job runs on Windows
+
+    steps:
+      - name: Download Release Asset Using GitHub CLI
         run: |
+          # Authenticate GitHub CLI
+          gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
+          
+          # List workflow runs
           echo "Listing workflow runs..."
           gh run list --repo "JebaShinba/LoginTest" --limit 5
 
-      # Step 5: Fetch artifact list from a specific run ID
-      - name: List Artifacts
-        run: |
-          # Set the run ID dynamically (example: use the most recent run)
-          run_id=$(gh run list --repo "JebaShinba/LoginTest" --limit 1 --json databaseId --jq '.[0].databaseId')
-          echo "Run ID: $run_id"
-          
-          # Now, list the artifacts of the latest run
-          gh run artifacts --repo "JebaShinba/LoginTest" --run-id $run_id
+          # Set version tag and run ID (adjust these based on your needs)
+          versionTag="v2024.11.12-043105"
+          repo="JebaShinba/LoginTest"
 
-      # Step 6: Download the artifact (assuming the artifact is named "downloaded_filename.zip")
-      - name: Download Artifact
-        run: |
-          # Use the exact artifact name and provide a local directory to save the file
-          run_id=$(gh run list --repo "JebaShinba/LoginTest" --limit 1 --json databaseId --jq '.[0].databaseId')
-          echo "Run ID for download: $run_id"
-          artifact_name="downloaded_filename.zip"
-          download_dir="C:/Users/jebas/Downloads"
+          # List artifacts for a specific run (replace '123456' with the actual run ID)
+          echo "Listing artifacts for run ID 11815158690..."
+          gh run artifacts --repo "$repo" --run-id 11815158690
 
+          # Download the specific artifact (ensure 'downloaded_filename.zip' is the correct name)
+          echo "Downloading artifact 'downloaded_filename.zip'..."
+          gh run download --repo "$repo" --name "downloaded_filename.zip" --dir "C:/Users/jebas/Downloads"
           
-          # Download the artifact
-          gh run download --repo "JebaShinba/LoginTest" --name "$artifact_name" --run-id $run_id --dir "$download_dir"
-          
-          echo "Artifact downloaded to: $download_dir/$artifact_name"
-
-      # Step 7: (Optional) Deploy the downloaded artifact
-      - name: Deploy the Downloaded Artifact
+      - name: Verify File Download
         run: |
-          echo "Deploying the downloaded artifact..."
-          # Add your deployment commands here
+          if (Test-Path "C:\Users\jebas\Downloads\downloaded_filename.zip") {
+              Write-Output "Download successful!"
+          } else {
+              Write-Output "Download failed."
+          }
