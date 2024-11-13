@@ -1,19 +1,30 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 import unittest
+import sys
 from homeobjects.login import LoginPage
-from configfile.config import get_db, get_users_collection  # Imports from config
-
+from scripts.setup_mongodb import MongoClient
 class ValidLoginTest(unittest.TestCase):
     valid_users = []
+    client = None  # Class variable to hold the MongoDB client
 
     @classmethod
     def setUpClass(cls):
-        cls.driver = webdriver.Chrome()
-        cls.driver.implicitly_wait(5)
+        # Initialize the MongoDB client
+        cls.client = MongoClient("mongodb://127.0.0.1:27017/")  # Update this URI as necessary
+        cls.db = cls.client["test_db"]  # Use your actual database name
+        cls_users_collection = cls.db["test_collection"]  # Use your actual collection name
 
         # Fetch valid user credentials from MongoDB
-        db = get_db()  # Establishes the database connection
-        cls_users_collection = get_users_collection()  # Gets the users collection
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")  
+        chrome_options.add_argument("--no-sandbox")  # Recommended for certain environments
+        chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+        chrome_options.add_argument("--disable-gpu")  # Disable GPU for headless mode
+        chrome_options.add_argument("--window-size=1920,1080")  # Set window size if needed
+
+        cls.driver = webdriver.Chrome(options=chrome_options)
+        cls.driver.implicitly_wait(5)
 
         # Retrieve only valid users
         cls.valid_users = list(cls_users_collection.find({"is_valid": False}))
