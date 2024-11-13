@@ -86,6 +86,8 @@ jobs:
   download_release:
     runs-on: windows-latest  # This job runs on Windows
 
+    
+
     steps:
       - name: Download Release Asset Using PowerShell
         run: |
@@ -113,3 +115,9 @@ jobs:
           } else {
               Write-Output "No asset named 'filename.zip' was found in the release."
           }
+
+      - name: Upload downloaded file as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: downloaded_filename.zip
+          path: C:\Users\jebas\LoginTest\downloaded_filename.zip
