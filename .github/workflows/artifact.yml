@@ -85,33 +85,30 @@ jobs:
 
   download_release:
     runs-on: windows-latest  # This job runs on Windows
-
+    needs: release
     steps:
-      - name: Download Release Asset Using GitHub CLI
+      - name: Download Release Asset Using PowerShell
         run: |
-          # Authenticate GitHub CLI
-          gh auth login --with-token <<< ${{ secrets.GITHUB_TOKEN }}
-          
-          # List workflow runs
-          echo "Listing workflow runs..."
-          gh run list --repo "JebaShinba/LoginTest" --limit 5
+          # Define variables
+          $versionTag = "v2024.11.12-043105"  # Replace with the actual version tag
+          $repo = "JebaShinba/LoginTest"  # Replace with your repo name
+          $downloadPath = "C:\\Users\\jebas\\LoginTest\\downloaded_filename.zip"  # Path to save the file
 
-          # Set version tag and run ID (adjust these based on your needs)
-          versionTag="v2024.11.12-043105"
-          repo="JebaShinba/LoginTest"
+          # Ensure the directory exists
+          if (!(Test-Path -Path (Split-Path -Parent $downloadPath))) {
+              New-Item -ItemType Directory -Path (Split-Path -Parent $downloadPath) | Out-Null
+          }
 
-          # List artifacts for a specific run (replace '123456' with the actual run ID)
-          echo "Listing artifacts for run ID 11815158690..."
-          gh run artifacts --repo "$repo" --run-id 11815158690
+          # Fetch release info for the given version tag
+          $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/tags/$versionTag" -UseBasicParsing
 
-          # Download the specific artifact (ensure 'downloaded_filename.zip' is the correct name)
-          echo "Downloading artifact 'downloaded_filename.zip'..."
-          gh run download --repo "$repo" --name "downloaded_filename.zip" --dir "C:/Users/jebas/Downloads"
-          
-      - name: Verify File Download
-        run: |
-          if (Test-Path "C:\Users\jebas\Downloads\downloaded_filename.zip") {
-              Write-Output "Download successful!"
+          # Extract the download URL for the asset named 'filename.zip'
+          $downloadUrl = ($response.assets | Where-Object { $_.name -eq "filename.zip" }).browser_download_url
+
+          # If the URL is found, download the asset
+          if ($downloadUrl) {
+              Invoke-WebRequest -Uri $downloadUrl -OutFile $downloadPath
+              Write-Output "Downloaded file saved as $downloadPath."
           } else {
-              Write-Output "Download failed."
+              Write-Output "No asset named 'filename.zip' found."
           }
