@@ -1,8 +1,13 @@
 name: Release Push CI
 
 on:
-  release:
-    types: [published]
+  
+    workflow_run:
+      workflows: ["Release Download CI1"]  # Specify the workflow(s) to watch
+      types:
+        - completed
+    release:
+      types: [published]
 
 
 jobs:
