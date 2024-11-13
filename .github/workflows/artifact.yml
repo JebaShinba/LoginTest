@@ -15,13 +15,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: List all workflow runs for the repository
+      # Step 2: Set up GitHub CLI (GH CLI)
+      - name: Set up GitHub CLI
+        run: |
+          sudo apt-get install gh
+
+      # Step 3: Authenticate with GitHub CLI using the GitHub token
+      - name: Authenticate GitHub CLI
+        env:
+          GH_TOKEN: ${{ github.token }}  # Use GitHub's default token
+        run: |
+          gh auth login --with-token <<< $GH_TOKEN
+
+      # Step 4: List Workflow Runs
       - name: List Workflow Runs
         run: |
           echo "Listing workflow runs..."
           gh run list --repo "JebaShinba/LoginTest" --limit 5
 
-      # Step 3: Fetch artifact list from a specific run ID
+      # Step 5: Fetch artifact list from a specific run ID
       - name: List Artifacts
         run: |
           # Set the run ID dynamically (example: use the most recent run)
@@ -31,23 +43,23 @@ jobs:
           # Now, list the artifacts of the latest run
           gh run artifacts --repo "JebaShinba/LoginTest" --run-id $run_id
 
-      # Step 4: Download the artifact (assuming the artifact is named "downloaded_filename.zip")
+      # Step 6: Download the artifact (assuming the artifact is named "downloaded_filename.zip")
       - name: Download Artifact
         run: |
           # Use the exact artifact name and provide a local directory to save the file
           run_id=$(gh run list --repo "JebaShinba/LoginTest" --limit 1 --json databaseId --jq '.[0].databaseId')
           echo "Run ID for download: $run_id"
           artifact_name="downloaded_filename.zip"
-          download_dir="/home/runner/work/my-project/my-project/downloads"
+          download_dir="C:/Users/jebas/Downloads"
+
           
           # Download the artifact
           gh run download --repo "JebaShinba/LoginTest" --name "$artifact_name" --run-id $run_id --dir "$download_dir"
           
           echo "Artifact downloaded to: $download_dir/$artifact_name"
 
-      # Step 5: (Optional) Deploy the downloaded artifact or use it in subsequent steps
+      # Step 7: (Optional) Deploy the downloaded artifact
       - name: Deploy the Downloaded Artifact
         run: |
           echo "Deploying the downloaded artifact..."
-          # Add your deployment commands here, for example:
-          # unzip "$download_dir/$artifact_name" -d /path/to/deployment/directory
+          # Add your deployment commands here
