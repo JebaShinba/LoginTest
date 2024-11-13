@@ -22,6 +22,6 @@ echo "Using script path: $script_path"
 
 # Run each Selenium test script
 python "$script_path/scripts/setup_mongodb.py"
-python "$script_path/login_testcases/ivlid.py"
+python "$script_path/login_testcases/invlid.py"
 
 echo "All tests completed."
