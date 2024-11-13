@@ -1,0 +1,53 @@
+name: Download and Deploy Artifact
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  download-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: List all workflow runs for the repository
+      - name: List Workflow Runs
+        run: |
+          echo "Listing workflow runs..."
+          gh run list --repo "JebaShinba/LoginTest" --limit 5
+
+      # Step 3: Fetch artifact list from a specific run ID
+      - name: List Artifacts
+        run: |
+          # Set the run ID dynamically (example: use the most recent run)
+          run_id=$(gh run list --repo "JebaShinba/LoginTest" --limit 1 --json databaseId --jq '.[0].databaseId')
+          echo "Run ID: $run_id"
+          
+          # Now, list the artifacts of the latest run
+          gh run artifacts --repo "JebaShinba/LoginTest" --run-id $run_id
+
+      # Step 4: Download the artifact (assuming the artifact is named "downloaded_filename.zip")
+      - name: Download Artifact
+        run: |
+          # Use the exact artifact name and provide a local directory to save the file
+          run_id=$(gh run list --repo "JebaShinba/LoginTest" --limit 1 --json databaseId --jq '.[0].databaseId')
+          echo "Run ID for download: $run_id"
+          artifact_name="downloaded_filename.zip"
+          download_dir="/home/runner/work/my-project/my-project/downloads"
+          
+          # Download the artifact
+          gh run download --repo "JebaShinba/LoginTest" --name "$artifact_name" --run-id $run_id --dir "$download_dir"
+          
+          echo "Artifact downloaded to: $download_dir/$artifact_name"
+
+      # Step 5: (Optional) Deploy the downloaded artifact or use it in subsequent steps
+      - name: Deploy the Downloaded Artifact
+        run: |
+          echo "Deploying the downloaded artifact..."
+          # Add your deployment commands here, for example:
+          # unzip "$download_dir/$artifact_name" -d /path/to/deployment/directory
