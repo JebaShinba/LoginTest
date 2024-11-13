@@ -5,7 +5,7 @@ on:
     branches:
       - main
   workflow_dispatch:
-  
+
 permissions:
   contents: write
   actions: read
@@ -83,3 +83,27 @@ jobs:
       - name: List files in the downloaded directory
         run: ls -l ./downloaded_files
 
+  download_release:
+    runs-on: windows-latest  # This job runs on Windows
+
+    steps:
+      - name: Download Release Asset Using PowerShell
+        run: |
+          # Define variables
+          $versionTag = "v2024.11.12-043105"
+          $repo = "JebaShinba/LoginTest"
+          $downloadPath = "C:\\Users\\jebas\\LoginTest\\downloaded_filename.zip"  # Set the path where the file will be saved
+
+          # Fetch the release data for the specified tag
+          $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/tags/$versionTag" -UseBasicParsing
+
+          # Extract the download URL for the asset named 'filename.zip'
+          $downloadUrl = ($response.assets | Where-Object { $_.name -eq "filename.zip" }).browser_download_url
+
+          # Check if the URL was found, then download the asset
+          if ($downloadUrl) {
+              Invoke-WebRequest -Uri $downloadUrl -OutFile $downloadPath
+              Write-Output "Downloaded file saved as $downloadPath."
+          } else {
+              Write-Output "No asset named 'filename.zip' was found in the release."
+          }
