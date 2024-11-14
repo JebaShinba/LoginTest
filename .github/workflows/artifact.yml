@@ -85,39 +85,30 @@ jobs:
 
   download_release:
     runs-on: windows-latest  # This job runs on Windows
-
-    
-
+    needs: release
     steps:
       - name: Download Release Asset Using PowerShell
         run: |
           # Define variables
-          $versionTag = "v2024.11.12-043105"
-          $repo = "JebaShinba/LoginTest"
-          $downloadPath = "C:\\Users\\jebas\\LoginTest\\downloaded_filename.zip"  # Set the path where the file will be saved
-          $downloadDir = [System.IO.Path]::GetDirectoryName($downloadPath)  # Extract the directory path
+          $versionTag = "v2024.11.12-043105"  # Replace with the actual version tag
+          $repo = "JebaShinba/LoginTest"  # Replace with your repo name
+          $downloadPath = "C:\\Users\\jebas\\LoginTest\\downloaded_filename.zip"  # Path to save the file
 
           # Ensure the directory exists
-          if (!(Test-Path -Path $downloadDir)) {
-              New-Item -ItemType Directory -Path $downloadDir | Out-Null
+          if (!(Test-Path -Path (Split-Path -Parent $downloadPath))) {
+              New-Item -ItemType Directory -Path (Split-Path -Parent $downloadPath) | Out-Null
           }
 
-          # Fetch the release data for the specified tag
+          # Fetch release info for the given version tag
           $response = Invoke-RestMethod -Uri "https://api.github.com/repos/$repo/releases/tags/$versionTag" -UseBasicParsing
 
           # Extract the download URL for the asset named 'filename.zip'
           $downloadUrl = ($response.assets | Where-Object { $_.name -eq "filename.zip" }).browser_download_url
 
-          # Check if the URL was found, then download the asset
+          # If the URL is found, download the asset
           if ($downloadUrl) {
               Invoke-WebRequest -Uri $downloadUrl -OutFile $downloadPath
               Write-Output "Downloaded file saved as $downloadPath."
           } else {
-              Write-Output "No asset named 'filename.zip' was found in the release."
+              Write-Output "No asset named 'filename.zip' found."
           }
-
-      - name: Upload downloaded file as artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: downloaded_filename.zip
-          path: C:\Users\jebas\LoginTest\downloaded_filename.zip
