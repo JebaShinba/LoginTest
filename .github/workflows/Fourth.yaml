@@ -4,7 +4,7 @@ on:
   
    
   workflow_run:
-    workflows: ["Auto Release on Push to Main"]  # Specify the workflow(s) to watch
+    workflows: ["Auto Release on Push to Main"]  
     types:
       - completed
   release:
